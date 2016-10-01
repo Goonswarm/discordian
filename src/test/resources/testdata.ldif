@@ -1,0 +1,37 @@
+dn: dc=tendollarbond,dc=com
+dc: tendollarbond
+o: OHGOD LDAP server
+description: Root entry for tendollarbond.com
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+
+dn: ou=users,dc=tendollarbond,dc=com
+ou: users
+description: All users in OHGOD
+objectClass: top
+objectClass: organizationalUnit
+
+dn: cn=Darius JOHNSON,ou=users,dc=tendollarbond,dc=com
+objectClass: organizationalPerson
+objectClass: goonPilot
+cn: Darius JOHNSON
+sn: darius_johnson
+mail: dj@tendollarbond.com
+pilotActive: true
+
+dn: cn=Vincent Claeson,ou=users,dc=tendollarbond,dc=com
+objectClass: organizationalPerson
+objectClass: goonPilot
+cn: Vincent Claeson
+sn: vincent_claeson
+mail: tazjin@gmail.com
+pilotActive: true
+
+dn: cn=Baron Bloodshit,ou=users,dc=tendollarbond,dc=com
+objectClass: organizationalPerson
+objectClass: goonPilot
+cn: Baron Bloodshit
+sn: baron_bloodshit
+mail: baron@mossad.gov.il
+pilotActive: false
