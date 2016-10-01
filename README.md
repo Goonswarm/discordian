@@ -1,6 +1,7 @@
 Discordian
 ==========
 
+[![Build Status](https://travis-ci.org/Goonswarm/discordian.svg?branch=master)](https://travis-ci.org/Goonswarm/discordian)
 
 This is a Discord API client & bot that synchronises GoonAuth users from LDAP with Discord Guilds.
 
