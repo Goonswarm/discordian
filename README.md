@@ -18,5 +18,15 @@ locked down.
 
 See the [permission documentation][] for more information about this.
 
+## Configuration
+
+Discordian is configured via environment variables. Specifically:
+
+* `DISCORD_CLIENT_ID`: Client ID of the Discord application
+* `DISCORD_CLIENT_SECRET`: Secret key for the Discord application
+* `DISCORD_BOT_TOKEN`: Secret token for the Discord application bot
+* `LDAP_HOST`: LDAP server hostname to connect to
+* `LDAP_PORT`: LDAP server port to connect on
+
 [this link]: https://discordapp.com/oauth2/authorize?client_id=&scope=bot&permissions=0
 [permission documentation]: https://discordapp.com/developers/docs/topics/permissions#bitwise-permission-flags
