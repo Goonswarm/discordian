@@ -13,6 +13,9 @@ public class Config {
   /** Discord application client secret */
   String clientSecret;
 
+  /** Redirect URL for Discord OAuth flow */
+  String redirectUrl;
+
   /** Discord bot authentication token */
   String botToken;
 

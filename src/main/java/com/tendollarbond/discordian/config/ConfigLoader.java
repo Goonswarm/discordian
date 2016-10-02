@@ -10,6 +10,7 @@ import lombok.val;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_BOT_TOKEN;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_CLIENT_ID;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_CLIENT_SECRET;
+import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_REDIRECT_URL;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.LDAP_HOST;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.LDAP_PORT;
 
@@ -21,9 +22,10 @@ public class ConfigLoader {
   /**
    * Enum representing all possible environment configuration variables.
    * */
-  public static enum ConfigFields {
+  public enum ConfigFields {
     DISCORD_CLIENT_ID,
     DISCORD_CLIENT_SECRET,
+    DISCORD_REDIRECT_URL,
     DISCORD_BOT_TOKEN,
     LDAP_HOST,
     LDAP_PORT
@@ -44,15 +46,18 @@ public class ConfigLoader {
   /** Validation of configuration values */
   public static Validation<List<String>, Config> validateConfig(Map<String, String> env) {
     return Validation.combine(
-        validatePresent(env.get(DISCORD_CLIENT_ID.toString()), DISCORD_CLIENT_ID),
-        validatePresent(env.get(DISCORD_CLIENT_SECRET.toString()), DISCORD_CLIENT_SECRET),
-        validatePresent(env.get(DISCORD_BOT_TOKEN.toString()), DISCORD_BOT_TOKEN),
-        validatePresent(env.get(LDAP_HOST.toString()), LDAP_HOST),
+        validatePresent(env, DISCORD_CLIENT_ID),
+        validatePresent(env, DISCORD_CLIENT_SECRET),
+        validatePresent(env, DISCORD_REDIRECT_URL),
+        validatePresent(env, DISCORD_BOT_TOKEN),
+        validatePresent(env, LDAP_HOST),
         validatePort(env.getOrDefault(LDAP_PORT.toString(), "389"), LDAP_PORT)
     ).ap(Config::new);
   }
 
-  private static Validation<String, String> validatePresent(String field, ConfigFields fieldName) {
+  private static Validation<String, String> validatePresent(Map<String, String> env,
+                                                            ConfigFields fieldName) {
+    val field = env.get(fieldName.toString());
     if (field == null) {
       val error = String.format("Missing configuration field: %s", fieldName.toString());
       return Validation.invalid(error);
