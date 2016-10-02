@@ -1,11 +1,11 @@
 package com.tendollarbond.discordian.discord;
 
-import java.util.EnumSet;
+import net.dv8tion.jda.Permission;
 
-import sx.blah.discord.handle.obj.Permissions;
+import javaslang.collection.HashSet;
+import javaslang.collection.Set;
 
-import static sx.blah.discord.handle.obj.Permissions.ADMINISTRATOR;
-import static sx.blah.discord.handle.obj.Permissions.generatePermissionsNumber;
+import static net.dv8tion.jda.Permission.ADMINISTRATOR;
 
 /**
  * Calculates the required permissions for Discordian.
@@ -13,11 +13,17 @@ import static sx.blah.discord.handle.obj.Permissions.generatePermissionsNumber;
  * TODO: Lock this down from just "Administrator"
  */
 public class PermissionHelper {
-  private static EnumSet<Permissions> discordianPermissions() {
-    return EnumSet.of(ADMINISTRATOR);
+  public static Set<Permission> discordianPermissions() {
+    return HashSet.of(ADMINISTRATOR);
   }
 
   public static int calculateDiscordianPermissions() {
-    return generatePermissionsNumber(discordianPermissions());
+    return calculatePermissions(discordianPermissions());
+  }
+
+  public static int calculatePermissions(Set<Permission> permissions) {
+    return permissions
+        .map(permission -> 1 << permission.getOffset())
+        .fold(0, (p1, p2) -> p1 |= p2);
   }
 }
