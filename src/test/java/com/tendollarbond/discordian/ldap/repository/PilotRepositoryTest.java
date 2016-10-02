@@ -15,6 +15,7 @@ import lombok.val;
 
 import static com.tendollarbond.discordian.ldap.Constants.BASE_DN;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PilotRepositoryTest {
   private InMemoryDirectoryServer testServer;
@@ -60,4 +61,11 @@ public class PilotRepositoryTest {
     assertEquals("Three pilots are returned in total", 3, pilots.size());
   }
 
+  @Test
+  public void getPilot() throws Exception {
+    val repository = new PilotRepository(testServer);
+    val pilot = repository.getPilot("Vincent Claeson");
+
+    assertTrue("Existing pilot is found", pilot.isDefined());
+  }
 }
