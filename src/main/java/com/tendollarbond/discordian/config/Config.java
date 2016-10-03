@@ -19,6 +19,9 @@ public class Config {
   /** Discord bot authentication token */
   String botToken;
 
+  /** Name of the Discord guild to administrate */
+  String guildName;
+
   /** LDAP server hostname to connect to */
   String ldapHost;
 

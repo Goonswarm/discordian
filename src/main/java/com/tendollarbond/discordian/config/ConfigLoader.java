@@ -10,6 +10,7 @@ import lombok.val;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_BOT_TOKEN;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_CLIENT_ID;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_CLIENT_SECRET;
+import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_GUILD_NAME;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_REDIRECT_URL;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.LDAP_HOST;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.LDAP_PORT;
@@ -27,6 +28,7 @@ public class ConfigLoader {
     DISCORD_CLIENT_SECRET,
     DISCORD_REDIRECT_URL,
     DISCORD_BOT_TOKEN,
+    DISCORD_GUILD_NAME,
     LDAP_HOST,
     LDAP_PORT
   }
@@ -50,6 +52,7 @@ public class ConfigLoader {
         validatePresent(env, DISCORD_CLIENT_SECRET),
         validatePresent(env, DISCORD_REDIRECT_URL),
         validatePresent(env, DISCORD_BOT_TOKEN),
+        validatePresent(env, DISCORD_GUILD_NAME),
         validatePresent(env, LDAP_HOST),
         validatePort(env.getOrDefault(LDAP_PORT.toString(), "389"), LDAP_PORT)
     ).ap(Config::new);

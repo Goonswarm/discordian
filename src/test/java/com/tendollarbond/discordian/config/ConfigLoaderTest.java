@@ -11,6 +11,7 @@ import lombok.val;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_BOT_TOKEN;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_CLIENT_ID;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_CLIENT_SECRET;
+import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_GUILD_NAME;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.DISCORD_REDIRECT_URL;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.LDAP_HOST;
 import static com.tendollarbond.discordian.config.ConfigLoader.ConfigFields.LDAP_PORT;
@@ -26,6 +27,7 @@ public class ConfigLoaderTest {
     env.put(DISCORD_CLIENT_SECRET.toString(), "secret");
     env.put(DISCORD_REDIRECT_URL.toString(), "redirect-url");
     env.put(DISCORD_BOT_TOKEN.toString(), "bot-token");
+    env.put(DISCORD_GUILD_NAME.toString(), "guild-name");
     env.put(LDAP_HOST.toString(), "ldap-host");
 
     val config = ConfigLoader.validateConfig(env);
