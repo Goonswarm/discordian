@@ -98,6 +98,7 @@ public class PilotRepository {
 
     Option.of(entry.getAttributeValue("cn")).forEach(builder::characterName);
     Option.of(entry.getAttributeValue("mail")).forEach(builder::mailAddress);
+    builder.discordId(Option.of(entry.getAttributeValue("discordId")));
 
     // Corporation is not stored on the entry (yet)
     //Option.of(entry.getAttributeValue("")).forEach(cn -> builder.characterName(cn));

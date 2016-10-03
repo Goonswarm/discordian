@@ -1,5 +1,6 @@
 package com.tendollarbond.discordian.ldap.model;
 
+import javaslang.control.Option;
 import lombok.Builder;
 import lombok.Value;
 
@@ -11,6 +12,7 @@ import lombok.Value;
 public class Pilot {
   String characterName;
   String mailAddress;
+  Option<String> discordId;
   //String corporation;
   //boolean pilotActive;
 }
