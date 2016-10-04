@@ -42,9 +42,10 @@ public class ConfigLoaderTest {
     env.put(LDAP_PORT.toString(), "invalid-port");
 
     val config = ConfigLoader.validateConfig(env);
+    val optionalFields = 2;
 
     assertFalse("Configuration is invalid", config.isValid());
-    assertEquals("One error is returned per field",
-        ConfigFields.values().length, config.getError().size());
+    assertEquals("One error is returned per non-optional field",
+        ConfigFields.values().length - optionalFields, config.getError().size());
   }
 }
