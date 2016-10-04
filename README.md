@@ -24,6 +24,7 @@ Discordian is configured via environment variables. Specifically:
 
 * `DISCORD_CLIENT_ID`: Client ID of the Discord application
 * `DISCORD_CLIENT_SECRET`: Secret key for the Discord application
+* `DISCORD_REDIRECT_URL`: OAuth2 redirect URL for catching authentication codes
 * `DISCORD_BOT_TOKEN`: Secret token for the Discord application bot
 * `LDAP_HOST`: LDAP server hostname to connect to
 * `LDAP_PORT`: LDAP server port to connect on
