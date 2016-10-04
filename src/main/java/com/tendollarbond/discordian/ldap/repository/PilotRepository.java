@@ -31,6 +31,7 @@ public class PilotRepository {
    * Attempts to find a single pilot in the LDAP directory.
    * */
   public Option<Pilot> getPilot(String name) throws LDAPSearchException {
+    log.info("Fetching pilot {} from LDAP", name);
     val specificPilotFilter = Filter.createANDFilter(
         createEqualityFilter("objectClass", "goonPilot"),
         createEqualityFilter("cn", name));
