@@ -7,7 +7,6 @@ import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.entities.Guild;
 import net.dv8tion.jda.entities.User;
 import net.dv8tion.jda.entities.impl.JDAImpl;
-import net.dv8tion.jda.requests.Requester.Response;
 
 import org.json.JSONObject;
 
@@ -56,7 +55,7 @@ public class GuildManager {
    * See https://discordapp.com/developers/docs/resources/guild#add-guild-member for more
    * information.
    */
-  public Try<Response> addMember(NewUser user) {
+  public Try<NewUser> addMember(NewUser user) {
     log.info("Adding user {} to guild {}", user.getCharacterName(), guild.getName());
     val requester = ((JDAImpl) client).getRequester();
     val url = DISCORD_API_PREFIX + "guilds/" + guild.getId() + "/members/" + user.getId();
@@ -64,6 +63,7 @@ public class GuildManager {
         .put("access_token", user.getOAuthToken())
         .put("nick", user.getCharacterName());
 
-    return Try.of(() -> requester.put(url, req));
+    // We need the NewUser value further downstream, but also want to know if this call succeeded.
+    return Try.of(() -> requester.put(url, req)).map(resp -> user);
   }
 }

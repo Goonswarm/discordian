@@ -14,11 +14,14 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+import javaslang.collection.HashMap;
 import javaslang.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
+import spark.template.mustache.MustacheTemplateEngine;
 
 import static spark.Spark.exception;
 import static spark.Spark.get;
@@ -41,7 +44,8 @@ public class DiscordianEndpoint implements Runnable {
   @Override
   public void run() {
     log.info("Starting Discordian endpoint");
-    get("/start", this::startDiscordRegistration);
+    get("/start", this::startDiscordRegistration, new MustacheTemplateEngine());
+    get("/foo", ((request, response) -> "bar"));
     get("/token", this::handleDiscordCode);
     exception(DiscordianError.class, this::errorHandler);
   }
@@ -57,10 +61,9 @@ public class DiscordianEndpoint implements Runnable {
   /**
    * Redirects the user to the Discord authentication page.
    * */
-  private String startDiscordRegistration(Request request, Response response) {
+  private ModelAndView startDiscordRegistration(Request request, Response response) {
     val discordUrl = flow.getAuthorizationUrl();
-    response.redirect(discordUrl, 302);
-    return "";
+    return new ModelAndView(HashMap.of("url", discordUrl).toJavaMap(), "start.html");
   }
 
   /**
@@ -81,16 +84,18 @@ public class DiscordianEndpoint implements Runnable {
 
     val accessToken = flow.getAccessToken(code);
 
-    val newUser = accessToken
+    accessToken
         .mapTry(DiscordianEndpoint::getDiscordUserId)
         // Create a NewUserBuilder and apply the first known fields to it.
         .map(discordId -> NewUser.builder().id(discordId).oAuthToken(accessToken.get()))
         .flatMapTry(builder -> applyPilotFromLdap(user, builder))
+        .flatMap(manager::addMember)
+        .flatMap(newUser -> pilotRepository
+            .getPilot(newUser.getCharacterName())
+            .map(pilot -> pilotRepository.updateDiscordId(pilot, newUser)))
         .onFailure(e -> {
           log.error("Error while handling Discord code.", e);
           throw new DiscordianError("Could not gather all required user information.");});
-
-    newUser.map(manager::addMember);
 
     return "success";
   }
@@ -101,12 +106,11 @@ public class DiscordianEndpoint implements Runnable {
    */
   private Try<NewUser> applyPilotFromLdap
   (String username, NewUserBuilder builder) throws LDAPSearchException {
-    val optionPilot = pilotRepository.getPilot(username);
-    return optionPilot
+    val pilot = pilotRepository.getPilot(username);
+    return pilot
         .map(Pilot::getCharacterName)
         .map(builder::characterName)
-        .map(NewUserBuilder::build)
-        .toTry();
+        .map(NewUserBuilder::build);
   }
 
   /**

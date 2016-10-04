@@ -45,6 +45,11 @@
       <version>2.5</version>
     </dependency>
     <dependency>
+      <groupId>com.sparkjava</groupId>
+      <artifactId>spark-template-mustache</artifactId>
+      <version>2.3</version>
+    </dependency>
+    <dependency>
       <groupId>com.mashape.unirest</groupId>
       <artifactId>unirest-java</artifactId>
       <version>1.4.9</version>
