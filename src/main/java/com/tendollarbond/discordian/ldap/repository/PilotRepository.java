@@ -1,15 +1,21 @@
 package com.tendollarbond.discordian.ldap.repository;
 
+import com.tendollarbond.discordian.discord.model.NewUser;
 import com.tendollarbond.discordian.ldap.model.Pilot;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPInterface;
 import com.unboundid.ldap.sdk.LDAPSearchException;
+import com.unboundid.ldap.sdk.Modification;
+import com.unboundid.ldap.sdk.ModificationType;
+import com.unboundid.ldap.sdk.ModifyRequest;
 import com.unboundid.ldap.sdk.SearchRequest;
+import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchScope;
 
 import javaslang.collection.List;
 import javaslang.control.Option;
+import javaslang.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -30,18 +36,18 @@ public class PilotRepository {
   /**
    * Attempts to find a single pilot in the LDAP directory.
    * */
-  public Option<Pilot> getPilot(String name) throws LDAPSearchException {
+  public Try<Pilot> getPilot(String name) {
     log.info("Fetching pilot {} from LDAP", name);
     val specificPilotFilter = Filter.createANDFilter(
         createEqualityFilter("objectClass", "goonPilot"),
         createEqualityFilter("cn", name));
 
     val searchRequest = new SearchRequest(USER_DN, SearchScope.ONE, specificPilotFilter);
-    val result = connection.search(searchRequest).getSearchEntries().stream()
-        .map(PilotRepository::parsePilot)
-        .findFirst();
 
-    return Option.ofOptional(result);
+    return Try.of(() -> connection.search(searchRequest))
+        .map(SearchResult::getSearchEntries)
+        .map(entryList -> entryList.get(0))
+        .map(PilotRepository::parsePilot);
   }
 
   /**
@@ -61,6 +67,16 @@ public class PilotRepository {
   public List<Pilot> listInactivePilots() throws LDAPSearchException {
     val activeFilter = createEqualityFilter("pilotActive", "false");
     return listPilots(Option.of(activeFilter));
+  }
+
+  /**
+   * Updates a pilot's Discord user ID in LDAP.
+   */
+  public Try<Pilot> updateDiscordId(Pilot pilot, NewUser newUser) {
+    val id = newUser.getId();
+    val modification = new Modification(ModificationType.REPLACE, "discordID", id);
+    val request = new ModifyRequest(pilot.getDistinguishedName(), modification);
+    return Try.of(() -> connection.modify(request)).map(r -> pilot.withDiscordId(Option.of(id)));
   }
 
   /**
@@ -97,9 +113,11 @@ public class PilotRepository {
   private static Pilot parsePilot(SearchResultEntry entry) {
     val builder = Pilot.builder();
 
+    Option.of(entry.getDN()).forEach(builder::distinguishedName);
     Option.of(entry.getAttributeValue("cn")).forEach(builder::characterName);
     Option.of(entry.getAttributeValue("mail")).forEach(builder::mailAddress);
-    builder.discordId(Option.of(entry.getAttributeValue("discordId")));
+    Option.of(entry.getAttributeValueAsBoolean("pilotActive")).forEach(builder::pilotActive);
+    builder.discordId(Option.of(entry.getAttributeValue("discordID")));
 
     // Corporation is not stored on the entry (yet)
     //Option.of(entry.getAttributeValue("")).forEach(cn -> builder.characterName(cn));

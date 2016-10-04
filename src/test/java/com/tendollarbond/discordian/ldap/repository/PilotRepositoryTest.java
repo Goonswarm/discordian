@@ -1,5 +1,6 @@
 package com.tendollarbond.discordian.ldap.repository;
 
+import com.tendollarbond.discordian.discord.model.NewUser;
 import com.unboundid.ldap.listener.InMemoryDirectoryServer;
 import com.unboundid.ldap.listener.InMemoryDirectoryServerConfig;
 import com.unboundid.ldap.listener.InMemoryListenerConfig;
@@ -66,6 +67,21 @@ public class PilotRepositoryTest {
     val repository = new PilotRepository(testServer);
     val pilot = repository.getPilot("Vincent Claeson");
 
-    assertTrue("Existing pilot is found", pilot.isDefined());
+    assertTrue("Existing pilot is found", pilot.isSuccess());
+  }
+
+  @Test
+  public void updateDiscordId() {
+    val repository = new PilotRepository(testServer);
+    val newUser = NewUser.builder().id("123").build();
+    val result = repository
+        .getPilot("Vincent Claeson")
+        .map(p -> repository.updateDiscordId(p, newUser));
+
+    assertTrue("Update operation is a success", result.isSuccess());
+
+    val updated = repository.getPilot("Vincent Claeson");
+
+    assertEquals("New Discord ID matches", "123", updated.get().getDiscordId().get());
   }
 }
