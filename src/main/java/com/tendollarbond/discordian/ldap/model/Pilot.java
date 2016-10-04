@@ -17,8 +17,6 @@ public class Pilot {
   /** EVE character name */
   String characterName;
 
-  String mailAddress;
-
   /** User ID of the user in Discord */
   @Wither Option<String> discordId;
 

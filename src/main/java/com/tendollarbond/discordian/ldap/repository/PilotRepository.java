@@ -37,7 +37,7 @@ public class PilotRepository {
    * Attempts to find a single pilot in the LDAP directory.
    * */
   public Try<Pilot> getPilot(String name) {
-    log.info("Fetching pilot {} from LDAP", name);
+    log.debug("Fetching pilot {} from LDAP", name);
     val specificPilotFilter = Filter.createANDFilter(
         createEqualityFilter("objectClass", "goonPilot"),
         createEqualityFilter("cn", name));
@@ -73,6 +73,7 @@ public class PilotRepository {
    * Updates a pilot's Discord user ID in LDAP.
    */
   public Try<Pilot> updateDiscordId(Pilot pilot, NewUser newUser) {
+    log.info("Setting Discord ID for {} to {}", pilot.getCharacterName(), newUser.getId());
     val id = newUser.getId();
     val modification = new Modification(ModificationType.REPLACE, "discordID", id);
     val request = new ModifyRequest(pilot.getDistinguishedName(), modification);
@@ -115,7 +116,6 @@ public class PilotRepository {
 
     Option.of(entry.getDN()).forEach(builder::distinguishedName);
     Option.of(entry.getAttributeValue("cn")).forEach(builder::characterName);
-    Option.of(entry.getAttributeValue("mail")).forEach(builder::mailAddress);
     Option.of(entry.getAttributeValueAsBoolean("pilotActive")).forEach(builder::pilotActive);
     builder.discordId(Option.of(entry.getAttributeValue("discordID")));
 
