@@ -11,6 +11,9 @@ import com.tendollarbond.discordian.ldap.repository.PilotRepository;
 import net.dv8tion.jda.JDA;
 import net.dv8tion.jda.JDABuilder;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import javax.security.auth.login.LoginException;
 
 import lombok.SneakyThrows;
@@ -34,6 +37,10 @@ public class Main {
     if (guildManager.isEmpty()) {
       throw new DiscordianError("Could not find guild " + config.getGuildName());
     }
+
+    val discordianPurger = new DiscordianPurger(guildManager.get(), pilotRepository);
+    Executors.newSingleThreadScheduledExecutor()
+        .scheduleAtFixedRate(discordianPurger, 1, 10, TimeUnit.MINUTES);
 
     new DiscordianEndpoint(pilotRepository, guildManager.get(), flow).run();
   }
