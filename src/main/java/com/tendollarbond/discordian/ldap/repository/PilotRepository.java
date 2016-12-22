@@ -13,6 +13,8 @@ import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchScope;
 
+import org.json.JSONObject;
+
 import javaslang.collection.List;
 import javaslang.control.Option;
 import javaslang.control.Try;
@@ -27,6 +29,13 @@ import static com.unboundid.ldap.sdk.Filter.createEqualityFilter;
  */
 @Slf4j
 public class PilotRepository {
+  final private static String PILOT_OBJECT_CLASS = "pilot";
+  final private static String PILOT_STATUS_ATTRIBUTE = "accountStatus";
+  final private static List<String> PILOT_ACTIVE_STATUS_VALUES = List.of("Internal", "Ally");
+  final private static Filter PILOT_ACTIVE_FILTER = Filter.createORFilter(PILOT_ACTIVE_STATUS_VALUES
+      .map(value -> createEqualityFilter(PILOT_STATUS_ATTRIBUTE, value))
+      .toJavaList());
+
   final private LDAPInterface connection;
 
   public PilotRepository(LDAPInterface connection) {
@@ -39,8 +48,8 @@ public class PilotRepository {
   public Try<Pilot> getPilot(String name) {
     log.debug("Fetching pilot {} from LDAP", name);
     val specificPilotFilter = Filter.createANDFilter(
-        createEqualityFilter("objectClass", "goonPilot"),
-        createEqualityFilter("cn", name));
+        createEqualityFilter("objectClass", PILOT_OBJECT_CLASS),
+        createEqualityFilter("characterName", name));
 
     val searchRequest = new SearchRequest(USER_DN, SearchScope.ONE, specificPilotFilter);
 
@@ -54,8 +63,7 @@ public class PilotRepository {
    * Returns a list of all currently active pilots in the LDAP directory.
    * */
   public List<Pilot> listActivePilots() throws LDAPSearchException {
-    val activeFilter = createEqualityFilter("pilotActive", "true");
-    return listPilots(Option.of(activeFilter));
+    return listPilots(Option.of(PILOT_ACTIVE_FILTER));
   }
 
   /**
@@ -65,8 +73,7 @@ public class PilotRepository {
    * member and have left.
    * */
   public List<Pilot> listInactivePilots() throws LDAPSearchException {
-    val activeFilter = createEqualityFilter("pilotActive", "false");
-    return listPilots(Option.of(activeFilter));
+    return listPilots(Option.of(Filter.createNOTFilter(PILOT_ACTIVE_FILTER)));
   }
 
   /**
@@ -74,10 +81,13 @@ public class PilotRepository {
    */
   public Try<Pilot> updateDiscordId(Pilot pilot, NewUser newUser) {
     log.info("Setting Discord ID for {} to {}", pilot.getCharacterName(), newUser.getId());
-    val id = newUser.getId();
-    val modification = new Modification(ModificationType.REPLACE, "discordID", id);
-    val request = new ModifyRequest(pilot.getDistinguishedName(), modification);
-    return Try.of(() -> connection.modify(request)).map(r -> pilot.withDiscordId(Option.of(id)));
+    return Try.of(() -> connection.getEntry(pilot.getDistinguishedName()))
+        .map(entry -> entry.getAttributeValue("metadata"))
+        .map(metadata -> insertDiscordId(metadata, newUser.getId()))
+        .map(updated -> new Modification(ModificationType.REPLACE, "metadata", updated))
+        .map(modification -> new ModifyRequest(pilot.getDistinguishedName(), modification))
+        .mapTry(connection::modify)
+        .map(r -> pilot.withDiscordId(Option.of(newUser.getId())));
   }
 
   /**
@@ -88,7 +98,7 @@ public class PilotRepository {
    * */
   public List<Pilot> listPilots(Option<Filter> additionalFilter) throws LDAPSearchException {
     // Basic filter to only retrieve pilot objects
-    val pilotFilter = createEqualityFilter("objectClass", "goonPilot");
+    val pilotFilter = createEqualityFilter("objectClass", PILOT_OBJECT_CLASS);
 
     // Combine the filters into a new one if an additional filter has been supplied.
     final Filter combinedFilter;
@@ -115,13 +125,23 @@ public class PilotRepository {
     val builder = Pilot.builder();
 
     Option.of(entry.getDN()).forEach(builder::distinguishedName);
-    Option.of(entry.getAttributeValue("cn")).forEach(builder::characterName);
-    Option.of(entry.getAttributeValueAsBoolean("pilotActive")).forEach(builder::pilotActive);
-    builder.discordId(Option.of(entry.getAttributeValue("discordID")));
-
-    // Corporation is not stored on the entry (yet)
-    //Option.of(entry.getAttributeValue("")).forEach(cn -> builder.characterName(cn));
+    Option.of(entry.getAttributeValue("characterName")).forEach(builder::characterName);
+    Option.of(entry.getAttributeValue(PILOT_STATUS_ATTRIBUTE))
+        .map(PILOT_ACTIVE_STATUS_VALUES::contains);
+    builder.discordId(Option.of(entry.getAttributeValue("metadata"))
+        .flatMap(PilotRepository::getDiscordId));
 
     return builder.build();
+  }
+
+  static Option<String> getDiscordId(String metadata) {
+    System.out.println(metadata);
+    return Try.of(() -> new JSONObject(metadata).getString("discordId")).toOption();
+  }
+
+  static String insertDiscordId(String metadata, String discordId) {
+    return Try
+        .of(() -> new JSONObject(metadata).put("discordId", discordId).toString())
+        .getOrElse(metadata);
   }
 }

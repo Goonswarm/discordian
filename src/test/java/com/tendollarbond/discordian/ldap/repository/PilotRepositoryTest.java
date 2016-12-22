@@ -15,7 +15,10 @@ import javaslang.control.Option;
 import lombok.val;
 
 import static com.tendollarbond.discordian.ldap.Constants.BASE_DN;
+import static in.tazj.javaslang.matchers.ControlMatchers.isDefined;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class PilotRepositoryTest {
@@ -81,7 +84,21 @@ public class PilotRepositoryTest {
     assertTrue("Update operation is a success", result.isSuccess());
 
     val updated = repository.getPilot("Vincent Claeson");
-
+    System.out.println(updated);
     assertEquals("New Discord ID matches", "123", updated.get().getDiscordId().get());
+  }
+
+  @Test
+  public void testGetDiscordId() {
+    final Option<String> discordId = PilotRepository.getDiscordId("{\"discordId\": \"test\"}");
+
+    assertThat(discordId, isDefined(equalTo("test")));
+  }
+
+  @Test
+  public void testPutDiscordId() {
+    final String updated = PilotRepository.insertDiscordId("{}", "foo");
+    final String expected = "{\"discordId\":\"foo\"}";
+    assertThat(updated, equalTo(expected));
   }
 }
