@@ -14,24 +14,30 @@ objectClass: organizationalUnit
 
 dn: cn=Darius JOHNSON,ou=users,dc=tendollarbond,dc=com
 objectClass: organizationalPerson
-objectClass: goonPilot
+objectClass: pilot
 cn: Darius JOHNSON
+charactername: Darius JOHNSON
 sn: darius_johnson
 mail: dj@tendollarbond.com
-pilotActive: true
+accountStatus: Internal
+metadata: {}
 
 dn: cn=Vincent Claeson,ou=users,dc=tendollarbond,dc=com
 objectClass: organizationalPerson
-objectClass: goonPilot
+objectClass: pilot
 cn: Vincent Claeson
+charactername: Vincent Claeson
 sn: vincent_claeson
 mail: tazjin@gmail.com
-pilotActive: true
+accountStatus: Internal
+metadata: {}
 
 dn: cn=Baron Bloodshit,ou=users,dc=tendollarbond,dc=com
 objectClass: organizationalPerson
-objectClass: goonPilot
+objectClass: pilot
 cn: Baron Bloodshit
+charactername: Baron Bloodshit
 sn: baron_bloodshit
 mail: baron@mossad.gov.il
-pilotActive: false
+accountStatus: Foe
+metadata: {}
