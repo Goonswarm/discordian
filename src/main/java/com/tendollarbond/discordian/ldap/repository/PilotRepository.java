@@ -135,7 +135,6 @@ public class PilotRepository {
   }
 
   static Option<String> getDiscordId(String metadata) {
-    System.out.println(metadata);
     return Try.of(() -> new JSONObject(metadata).getString("discordId")).toOption();
   }
 
