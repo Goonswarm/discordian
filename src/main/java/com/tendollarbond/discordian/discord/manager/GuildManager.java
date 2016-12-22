@@ -72,7 +72,7 @@ public class GuildManager {
    * Fetch all current members of a guild.
    */
   public List<User> getMembers() {
-    return List.ofAll(guild.getUsers());
+    return List.ofAll(guild.getUsers()).filter(user -> !user.isBot());
   }
 
 }
