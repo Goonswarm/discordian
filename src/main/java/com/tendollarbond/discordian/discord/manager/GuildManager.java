@@ -10,6 +10,7 @@ import net.dv8tion.jda.entities.impl.JDAImpl;
 
 import org.json.JSONObject;
 
+import javaslang.collection.List;
 import javaslang.control.Option;
 import javaslang.control.Try;
 import lombok.extern.slf4j.Slf4j;
@@ -66,4 +67,12 @@ public class GuildManager {
     // We need the NewUser value further downstream, but also want to know if this call succeeded.
     return Try.of(() -> requester.put(url, req)).map(resp -> user);
   }
+
+  /**
+   * Fetch all current members of a guild.
+   */
+  public List<User> getMembers() {
+    return List.ofAll(guild.getUsers()).filter(user -> !user.isBot());
+  }
+
 }
